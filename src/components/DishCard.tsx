@@ -1,8 +1,10 @@
 import { Plus, Minus, Clock } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import type { Dish } from '@/types'
 import { useCartStore } from '@/store/cartStore'
 import { formatPrice } from '@/utils/format'
 import toast from 'react-hot-toast'
+import { platOptionsApi, type ApiOptionGroup } from '@/api/platOptions.api'
 
 interface Props {
   dish: Dish
@@ -15,6 +17,15 @@ export default function DishCard({ dish, restaurantId, restaurantName, layout = 
   const { items, addItem, updateQty, removeItem } = useCartStore()
   const cartItem = items.find(i => i.dish.id === dish.id)
   const qty = cartItem?.quantity || 0
+
+  const [platOptions, setPlatOptions] = useState<ApiOptionGroup[]>([])
+  useEffect(() => {
+    const platId = parseInt(dish.id, 10)
+    if (!platId) { setPlatOptions([]); return }
+    platOptionsApi.get(platId)
+      .then(r => setPlatOptions(r.data))
+      .catch(() => setPlatOptions([]))
+  }, [dish.id])
 
   const handleAdd = () => {
     if (!dish.isAvailable) return
@@ -36,6 +47,33 @@ export default function DishCard({ dish, restaurantId, restaurantName, layout = 
               </span>
             )}
           </div>
+          {platOptions.length > 0 && (
+            <div className="mt-3 space-y-3">
+              {platOptions.map(g => (
+                <div key={g.id}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h5 className="font-semibold text-xs text-warm-800">{g.nom}</h5>
+                    {g.obligatoire && (
+                      <span className="text-[10px] uppercase tracking-wide text-brand-500">obligatoire</span>
+                    )}
+                    <span className="text-[10px] text-warm-400">
+                      {g.selectionMode === 'SINGLE' ? 'choisir 1' : 'choix multiple'}
+                    </span>
+                  </div>
+                  <ul className="space-y-0.5">
+                    {g.items.map(it => (
+                      <li key={it.id} className="flex justify-between text-xs text-warm-600">
+                        <span className={it.disponible ? '' : 'line-through opacity-50'}>{it.nom}</span>
+                        <span className="ml-2 shrink-0">
+                          {it.prixSupplement > 0 ? `+${it.prixSupplement} DH` : 'inclus'}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         <div className="relative shrink-0">
           <img src={dish.image} alt={dish.name} className="w-28 h-28 rounded-2xl object-cover" />
