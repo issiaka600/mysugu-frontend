@@ -104,6 +104,10 @@ export const useCartStore = create<CartState>()(
         0
       ),
     }),
-    { name: 'mysugu-cart' }
+    {
+      name: 'mysugu-cart',
+      version: 1,
+      migrate: () => ({ items: [], isOpen: false, restaurantId: null, restaurantName: null } as any),
+    }
   )
 )
