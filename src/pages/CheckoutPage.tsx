@@ -222,7 +222,11 @@ export default function CheckoutPage() {
   const buildOrderData = (): ApiCommandeRequest => ({
     clientId: Number(user!.id),
     restaurantId: Number(items[0].restaurantId),
-    lignes: items.map(i => ({ platId: Number(i.dish.id), quantite: i.quantity })),
+    lignes: items.map(i => ({
+      platId: Number(i.dish.id),
+      quantite: i.quantity,
+      optionItemIds: (i.selectedOptions ?? []).map(o => o.optionItemId),
+    })),
     adresseLivraison: {
       latitude: lat || 0,
       longitude: lng || 0,
@@ -522,9 +526,17 @@ export default function CheckoutPage() {
             </h2>
             <div className="space-y-2.5 mb-4">
               {items.map(item => (
-                <div key={item.dish.id} className="flex justify-between text-sm">
-                  <span className="text-warm-600">{item.quantity}x {item.dish.name}</span>
-                  <span className="font-medium text-warm-800">{formatPrice(item.dish.price * item.quantity)}</span>
+                <div key={item.lineId} className="space-y-0.5">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-warm-600">{item.quantity}x {item.dish.name}</span>
+                    <span className="font-medium text-warm-800">{formatPrice(item.dish.price * item.quantity)}</span>
+                  </div>
+                  {(item.selectedOptions ?? []).map((o, idx) => (
+                    <div key={idx} className="text-xs text-warm-500 flex justify-between pl-4">
+                      <span>{o.optionGroupNom ? `${o.optionGroupNom}: ` : ''}{o.optionNom}</span>
+                      {o.prixSupplement > 0 && <span>+{o.prixSupplement} DH</span>}
+                    </div>
+                  ))}
                 </div>
               ))}
             </div>

@@ -157,7 +157,7 @@ export interface ApiCommande {
 export interface ApiCommandeRequest {
   clientId: number
   restaurantId: number
-  lignes: { platId: number; quantite: number; remarque?: string }[]
+  lignes: { platId: number; quantite: number; remarque?: string; optionItemIds?: number[] }[]
   adresseLivraison: {
     latitude: number
     longitude: number
