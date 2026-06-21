@@ -1,25 +1,36 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Search, SlidersHorizontal, X, ChevronDown, MapPin, Star, Zap, Clock, Tag, Flame } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+import { Search, SlidersHorizontal, X, ChevronDown } from 'lucide-react'
 import { categoriesApi, restaurantsApi, mapCategory, mapRestaurant } from '@/api'
 import type { Category, Restaurant } from '@/types'
 import RestaurantCard from '@/components/RestaurantCard'
 import { RestaurantCardSkeleton } from '@/components/Skeleton'
 import EmptyState from '@/components/EmptyState'
 import Chip from '@/components/Chip'
+import { filtresApi, type ApiFiltre } from '@/api/filtres.api'
+import { iconForKey } from '@/lib/filterIcons'
 
 type SortOption = 'recommended' | 'rating' | 'delivery_time'
-type QuickFilter = 'all' | 'subsahariens' | 'promotions' | 'closest' | 'top_rated' | 'fastest' | 'open_now'
+type QuickFilter = 'all' | 'subsahariens' | 'promotions' | 'closest' | 'top_rated' | 'fastest' | 'open_now' | string
 
-const QUICK_FILTERS: { id: QuickFilter; label: string; icon: LucideIcon }[] = [
-  { id: 'all',          label: 'Tous',         icon: Flame },
-  { id: 'subsahariens', label: 'Subsahariens', icon: Tag },
-  { id: 'promotions',   label: 'Promotions',   icon: Zap },
-  { id: 'closest',      label: 'Plus proches', icon: MapPin },
-  { id: 'top_rated',    label: 'Mieux notés',  icon: Star },
-  { id: 'fastest',      label: 'Plus rapides', icon: Clock },
-  { id: 'open_now',     label: 'Ouverts',      icon: Zap },
+// comportement backend -> clé de logique locale déjà implémentée dans cette page
+const COMPORTEMENT_TO_KEY: Record<string, string> = {
+  TOUS: 'all',
+  PROMOTIONS: 'promotions',
+  MIEUX_NOTES: 'top_rated',
+  PLUS_PROCHES: 'closest',
+  PLUS_RAPIDES: 'fastest',
+  OUVERTS: 'open_now',
+}
+
+// repli si l'API échoue : reproduit la barre actuelle
+const FALLBACK_FILTERS = [
+  { id: 'all', label: 'Tous', iconKey: 'Flame' },
+  { id: 'promotions', label: 'Promotions', iconKey: 'Zap' },
+  { id: 'top_rated', label: 'Mieux notés', iconKey: 'Star' },
+  { id: 'closest', label: 'Plus proches', iconKey: 'MapPin' },
+  { id: 'fastest', label: 'Plus rapides', iconKey: 'Clock' },
+  { id: 'open_now', label: 'Ouverts', iconKey: 'Zap' },
 ]
 
 export default function RestaurantsPage() {
@@ -38,9 +49,25 @@ export default function RestaurantsPage() {
   const [page, setPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
   const [showFilters, setShowFilters] = useState(false)
+  const [quickFilters, setQuickFilters] = useState<{ id: string; label: string; iconKey?: string; categorieId?: number | null }[]>(FALLBACK_FILTERS)
 
   useEffect(() => {
     categoriesApi.getAll().then(res => setCategories(res.data.map(mapCategory))).catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    filtresApi.getByContexte('RESTAURANT')
+      .then(res => {
+        const mapped = res.data
+          .map((f: ApiFiltre) => ({
+            id: f.comportement === 'CATEGORIE' ? `cat:${f.categorieId}` : (COMPORTEMENT_TO_KEY[f.comportement] || 'all'),
+            label: f.libelle,
+            iconKey: f.icone,
+            categorieId: f.categorieId,
+          }))
+        if (mapped.length) setQuickFilters(mapped)
+      })
+      .catch(() => { /* garde le repli */ })
   }, [])
 
   const fetchRestaurants = useCallback(async (pageNum = 0) => {
@@ -80,6 +107,10 @@ export default function RestaurantsPage() {
     }
     if (quickFilter === 'promotions') {
       list = list.filter(r => (r.tags || []).some(t => /promo|offre|reduction|réduction/i.test(t)))
+    }
+    if (quickFilter.startsWith('cat:')) {
+      const catId = quickFilter.slice(4)
+      list = list.filter(r => (r.categoryIds || []).includes(catId))
     }
 
     let activeSort = sort
@@ -180,11 +211,14 @@ export default function RestaurantsPage() {
 
         {/* Quick filters (mobile-app style) */}
         <div className="flex gap-2 overflow-x-auto scrollbar-hide mb-4 pb-1">
-          {QUICK_FILTERS.map(f => (
-            <Chip key={f.id} active={quickFilter === f.id} icon={f.icon} onClick={() => setQuickFilter(f.id)}>
-              {f.label}
-            </Chip>
-          ))}
+          {quickFilters.map(f => {
+            const Icon = iconForKey(f.iconKey)
+            return (
+              <Chip key={f.id} active={quickFilter === f.id} icon={Icon} onClick={() => setQuickFilter(f.id as QuickFilter)}>
+                {f.label}
+              </Chip>
+            )
+          })}
         </div>
 
         {/* Categories */}
