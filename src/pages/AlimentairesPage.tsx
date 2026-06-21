@@ -1,30 +1,28 @@
-import { useState, useEffect } from 'react'
-import { Search, X, MapPin, Clock, Tag, Apple, Carrot, Milk, Wheat, Store } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+import { useState, useEffect, useMemo } from 'react'
+import { Search, X, Store } from 'lucide-react'
 import { restaurantsApi, mapRestaurant } from '@/api'
 import type { Restaurant } from '@/types'
 import RestaurantCard from '@/components/RestaurantCard'
 import { RestaurantCardSkeleton } from '@/components/Skeleton'
 import EmptyState from '@/components/EmptyState'
 import Chip from '@/components/Chip'
+import { filtresApi, type ApiFiltre } from '@/api/filtres.api'
+import { iconForKey } from '@/lib/filterIcons'
 
-type QuickFilter =
-  | 'all'
-  | 'fruits_legumes'
-  | 'epicerie'
-  | 'boissons'
-  | 'promotions'
-  | 'closest'
-  | 'fastest'
+type QuickFilter = 'all' | 'fruits_legumes' | 'epicerie' | 'boissons' | 'promotions' | 'closest' | 'fastest' | string
 
-const QUICK_FILTERS: { id: QuickFilter; label: string; icon: LucideIcon }[] = [
-  { id: 'all',            label: 'Tous',           icon: Apple },
-  { id: 'fruits_legumes', label: 'Fruits & légumes', icon: Carrot },
-  { id: 'epicerie',       label: 'Épicerie',       icon: Wheat },
-  { id: 'boissons',       label: 'Boissons',       icon: Milk },
-  { id: 'promotions',     label: 'Promotions',     icon: Tag },
-  { id: 'closest',        label: 'Plus proches',   icon: MapPin },
-  { id: 'fastest',        label: 'Plus rapides',   icon: Clock },
+const COMPORTEMENT_TO_KEY: Record<string, string> = {
+  TOUS: 'all', PROMOTIONS: 'promotions', PLUS_PROCHES: 'closest', PLUS_RAPIDES: 'fastest',
+}
+
+const FALLBACK_FILTERS = [
+  { id: 'all',            label: 'Tous',            iconKey: 'Apple' },
+  { id: 'fruits_legumes', label: 'Fruits & légumes', iconKey: 'Carrot' },
+  { id: 'epicerie',       label: 'Épicerie',         iconKey: 'Wheat' },
+  { id: 'boissons',       label: 'Boissons',         iconKey: 'Milk' },
+  { id: 'promotions',     label: 'Promotions',       iconKey: 'Tag' },
+  { id: 'closest',        label: 'Plus proches',     iconKey: 'MapPin' },
+  { id: 'fastest',        label: 'Plus rapides',     iconKey: 'Clock' },
 ]
 
 export default function AlimentairesPage() {
@@ -32,6 +30,19 @@ export default function AlimentairesPage() {
   const [filter, setFilter] = useState<QuickFilter>('all')
   const [items, setItems] = useState<Restaurant[]>([])
   const [loading, setLoading] = useState(true)
+  const [quickFilters, setQuickFilters] = useState<{ id: string; label: string; iconKey?: string; categorieId?: number | null }[]>(FALLBACK_FILTERS)
+
+  useEffect(() => {
+    filtresApi.getByContexte('ALIMENTAIRE')
+      .then(res => {
+        const mapped = res.data.map((f: ApiFiltre) => ({
+          id: f.comportement === 'CATEGORIE' ? `cat:${f.categorieId}` : (COMPORTEMENT_TO_KEY[f.comportement] || 'all'),
+          label: f.libelle, iconKey: f.icone, categorieId: f.categorieId,
+        }))
+        if (mapped.length) setQuickFilters(mapped)
+      })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     let alive = true
@@ -42,6 +53,34 @@ export default function AlimentairesPage() {
       .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
   }, [])
+
+  const filteredItems = useMemo(() => {
+    let list = [...items]
+
+    if (search.trim()) {
+      const q = search.trim().toLowerCase()
+      list = list.filter(r => r.name?.toLowerCase().includes(q) || r.cuisineType?.toLowerCase().includes(q))
+    }
+
+    if (filter === 'promotions') {
+      list = list.filter(r => (r.tags || []).some(t => /promo|offre|reduction|réduction/i.test(t)))
+    } else if (filter.startsWith('cat:')) {
+      const catId = filter.slice(4)
+      list = list.filter(r => (r.categoryIds || []).includes(catId))
+    } else if (filter !== 'all' && filter !== 'closest' && filter !== 'fastest') {
+      // category-like local filter (fruits_legumes, epicerie, boissons)
+      list = list.filter(r => {
+        const haystack = `${(r.tags || []).join(' ')} ${r.cuisineType || ''}`.toLowerCase()
+        return haystack.includes(filter.replace('_', ' '))
+      })
+    }
+
+    if (filter === 'closest' || filter === 'fastest') {
+      list = list.sort((a, b) => parseInt(a.deliveryTime) - parseInt(b.deliveryTime))
+    }
+
+    return list
+  }, [items, search, filter])
 
   return (
     <div className="min-h-screen bg-warm-50">
@@ -70,24 +109,27 @@ export default function AlimentairesPage() {
         </div>
 
         <div className="flex gap-2 overflow-x-auto scrollbar-hide mb-8 pb-1">
-          {QUICK_FILTERS.map(f => (
-            <Chip key={f.id} active={filter === f.id} icon={f.icon} onClick={() => setFilter(f.id)}>
-              {f.label}
-            </Chip>
-          ))}
+          {quickFilters.map(f => {
+            const Icon = iconForKey(f.iconKey)
+            return (
+              <Chip key={f.id} active={filter === f.id} icon={Icon} onClick={() => setFilter(f.id as QuickFilter)}>
+                {f.label}
+              </Chip>
+            )
+          })}
         </div>
 
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {Array.from({ length: 6 }).map((_, i) => <RestaurantCardSkeleton key={i} />)}
           </div>
-        ) : items.length === 0 ? (
+        ) : filteredItems.length === 0 ? (
           <EmptyState icon={Store} title="Aucun commerce alimentaire pour le moment" description="Revenez bientôt, nous ajoutons de nouveaux partenaires." />
         ) : (
           <>
-            <p className="text-sm text-warm-500 mb-4">{items.length} commerce{items.length > 1 ? 's' : ''}</p>
+            <p className="text-sm text-warm-500 mb-4">{filteredItems.length} commerce{filteredItems.length > 1 ? 's' : ''}</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {items.map(r => <RestaurantCard key={r.id} restaurant={r} />)}
+              {filteredItems.map(r => <RestaurantCard key={r.id} restaurant={r} />)}
             </div>
           </>
         )}
