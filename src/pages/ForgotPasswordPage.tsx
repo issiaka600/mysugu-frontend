@@ -15,7 +15,7 @@ export default function ForgotPasswordPage() {
     try {
       await authApi.forgotPassword(email)
       setSent(true)
-      toast.success('Email de reinitialisation envoye')
+      toast.success('Email de réinitialisation envoyé')
     } catch (err) {
       toast.error(extractErrorMessage(err, 'Erreur lors de l\'envoi'))
     }
@@ -26,8 +26,8 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen bg-warm-50 flex items-center justify-center p-6">
       <div className="w-full max-w-md">
         <Link to="/" className="inline-flex items-center gap-2 mb-8">
-          <img src="/logo.png" alt="MySugu" className="h-10 w-10" />
-          <span className="font-display font-extrabold text-xl text-warm-900">My<span className="text-brand-500">Sugu</span></span>
+          <img src="/logo.png" alt="MySuku" className="h-10 w-10" />
+          <span className="font-display font-extrabold text-xl text-warm-900">My<span className="text-brand-500">Suku</span></span>
         </Link>
 
         {sent ? (
@@ -35,12 +35,12 @@ export default function ForgotPasswordPage() {
             <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-5">
               <Check size={32} className="text-emerald-500" />
             </div>
-            <h1 className="font-display font-extrabold text-2xl text-warm-900 mb-2">Email envoye !</h1>
+            <h1 className="font-display font-extrabold text-2xl text-warm-900 mb-2">Email envoyé !</h1>
             <p className="text-warm-400 text-sm mb-6">
-              Verifiez votre boite de reception a <strong>{email}</strong> pour reinitialiser votre mot de passe.
+              Vérifiez votre boîte de réception à <strong>{email}</strong> pour réinitialiser votre mot de passe.
             </p>
             <Link to="/login" className="btn-primary inline-flex items-center gap-2 text-sm">
-              Retour a la connexion
+              Retour à la connexion
             </Link>
           </div>
         ) : (
@@ -48,8 +48,8 @@ export default function ForgotPasswordPage() {
             <Link to="/login" className="flex items-center gap-1 text-sm text-warm-500 hover:text-warm-700 mb-6">
               <ArrowLeft size={16} /> Retour
             </Link>
-            <h1 className="font-display font-extrabold text-3xl text-warm-900 mb-2">Mot de passe oublie</h1>
-            <p className="text-warm-400 mb-8">Entrez votre email pour recevoir un lien de reinitialisation.</p>
+            <h1 className="font-display font-extrabold text-3xl text-warm-900 mb-2">Mot de passe oublié</h1>
+            <p className="text-warm-400 mb-8">Entrez votre email pour recevoir un lien de réinitialisation.</p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>

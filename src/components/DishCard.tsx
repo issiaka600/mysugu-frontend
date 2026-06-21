@@ -43,18 +43,18 @@ export default function DishCard({ dish, restaurantId, restaurantName, layout = 
             <div className="absolute -bottom-2 -right-2">
               {qty > 0 ? (
                 <div className="flex items-center gap-0.5 bg-white rounded-full shadow-card border border-warm-100">
-                  <button onClick={() => qty === 1 ? removeItem(dish.id) : updateQty(dish.id, qty - 1)}
+                  <button onClick={() => qty === 1 ? removeItem(dish.id) : updateQty(dish.id, qty - 1)} aria-label="Diminuer la quantité"
                     className="w-8 h-8 rounded-full flex items-center justify-center text-warm-500 hover:text-brand-500 transition-colors">
                     <Minus size={14} />
                   </button>
                   <span className="w-6 text-center text-sm font-bold text-warm-900">{qty}</span>
-                  <button onClick={() => updateQty(dish.id, qty + 1)}
+                  <button onClick={() => updateQty(dish.id, qty + 1)} aria-label="Augmenter la quantité"
                     className="w-8 h-8 rounded-full flex items-center justify-center text-warm-500 hover:text-brand-500 transition-colors">
                     <Plus size={14} />
                   </button>
                 </div>
               ) : (
-                <button onClick={handleAdd}
+                <button onClick={handleAdd} aria-label="Ajouter au panier"
                   className="w-9 h-9 rounded-full bg-brand-500 text-white flex items-center justify-center shadow-brand-sm hover:bg-brand-600 active:scale-90 transition-all">
                   <Plus size={18} />
                 </button>
@@ -89,18 +89,18 @@ export default function DishCard({ dish, restaurantId, restaurantName, layout = 
           {dish.isAvailable && (
             qty > 0 ? (
               <div className="flex items-center gap-0.5">
-                <button onClick={() => qty === 1 ? removeItem(dish.id) : updateQty(dish.id, qty - 1)}
+                <button onClick={() => qty === 1 ? removeItem(dish.id) : updateQty(dish.id, qty - 1)} aria-label="Diminuer la quantité"
                   className="w-7 h-7 rounded-lg border border-warm-200 flex items-center justify-center text-warm-500 hover:border-brand-300 transition-colors">
                   <Minus size={13} />
                 </button>
                 <span className="w-6 text-center text-xs font-bold text-warm-900">{qty}</span>
-                <button onClick={() => updateQty(dish.id, qty + 1)}
+                <button onClick={() => updateQty(dish.id, qty + 1)} aria-label="Augmenter la quantité"
                   className="w-7 h-7 rounded-lg border border-warm-200 flex items-center justify-center text-warm-500 hover:border-brand-300 transition-colors">
                   <Plus size={13} />
                 </button>
               </div>
             ) : (
-              <button onClick={handleAdd}
+              <button onClick={handleAdd} aria-label="Ajouter au panier"
                 className="w-8 h-8 rounded-xl bg-brand-50 text-brand-500 flex items-center justify-center hover:bg-brand-500 hover:text-white active:scale-90 transition-all">
                 <Plus size={16} />
               </button>

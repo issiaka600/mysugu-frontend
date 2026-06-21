@@ -2,10 +2,20 @@ import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   ShoppingBag, User, Bell, Heart, Search, Menu, X, LogOut,
-  ClipboardList, ChevronDown, Wallet,
+  ClipboardList, ChevronDown, Wallet, Mail,
 } from 'lucide-react'
 import { useCartStore } from '@/store/cartStore'
 import { useAuthStore } from '@/store/authStore'
+import ContactModal from '@/components/ContactModal'
+import Logo from './Logo'
+
+const NAV_ITEMS: { to: string; label: string; match: (p: string) => boolean }[] = [
+  { to: '/',             label: 'Accueil',      match: p => p === '/' },
+  { to: '/restaurants',  label: 'Restaurants',  match: p => p.startsWith('/restaurants') },
+  { to: '/alimentaires', label: 'Alimentaires', match: p => p.startsWith('/alimentaires') },
+  { to: '/cosmetiques',  label: 'Cosmétiques',  match: p => p.startsWith('/cosmetiques') },
+  { to: '/promotions',   label: 'Promos',       match: p => p.startsWith('/promotions') },
+]
 
 export default function Navbar() {
   const { pathname } = useLocation()
@@ -15,6 +25,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [contactOpen, setContactOpen] = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
 
   const count = totalItems()
@@ -43,6 +54,11 @@ export default function Navbar() {
     navigate('/')
   }
 
+  const openContact = () => {
+    setMenuOpen(false)
+    setContactOpen(true)
+  }
+
   return (
     <>
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -51,36 +67,39 @@ export default function Navbar() {
           : isHome ? 'py-3 bg-transparent' : 'py-3 bg-warm-50'
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-4">
-          {/* Logo */}
           <Link to="/" className="flex items-center gap-2 shrink-0">
-            <img src="/logo.png" alt="MySugu" className="h-9 w-9" />
-            <span className="font-display font-extrabold text-xl text-warm-900 hidden sm:block">
-              My<span className="text-brand-500">Sugu</span>
-            </span>
+            <Logo />
           </Link>
 
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-1">
-            <NavLink to="/" active={pathname === '/'}>Accueil</NavLink>
-            <NavLink to="/restaurants" active={pathname.startsWith('/restaurants')}>Restaurants</NavLink>
-            <NavLink to="/promotions" active={pathname === '/promotions'}>Promos</NavLink>
+          <nav className="hidden lg:flex items-center gap-0.5">
+            {NAV_ITEMS.map(item => (
+              <NavLink key={item.to} to={item.to} active={item.match(pathname)}>
+                {item.label}
+              </NavLink>
+            ))}
+            <button
+              onClick={openContact}
+              className="px-4 py-2 rounded-xl text-sm font-medium text-warm-600 hover:text-warm-900 hover:bg-warm-100 transition-colors inline-flex items-center gap-1.5"
+            >
+              <Mail size={14} /> Contact
+            </button>
           </nav>
 
-          {/* Right actions */}
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => navigate('/restaurants')}
-              className="md:hidden p-2.5 rounded-xl hover:bg-warm-100 text-warm-600 transition-colors"
+              aria-label="Rechercher"
+              className="lg:hidden p-2.5 rounded-xl hover:bg-warm-100 text-warm-600 transition-colors"
             >
               <Search size={20} />
             </button>
 
             {isAuthenticated && (
               <>
-                <Link to="/favoris" className="hidden sm:flex p-2.5 rounded-xl hover:bg-warm-100 text-warm-600 transition-colors">
+                <Link to="/favoris" aria-label="Favoris" className="hidden sm:flex p-2.5 rounded-xl hover:bg-warm-100 text-warm-600 transition-colors">
                   <Heart size={20} />
                 </Link>
-                <Link to="/notifications" className="relative p-2.5 rounded-xl hover:bg-warm-100 text-warm-600 transition-colors">
+                <Link to="/notifications" aria-label="Notifications" className="relative p-2.5 rounded-xl hover:bg-warm-100 text-warm-600 transition-colors">
                   <Bell size={20} />
                 </Link>
               </>
@@ -88,6 +107,7 @@ export default function Navbar() {
 
             <button
               onClick={openCart}
+              aria-label="Panier"
               className="relative p-2.5 rounded-xl hover:bg-brand-50 text-warm-700 transition-colors"
             >
               <ShoppingBag size={20} />
@@ -99,7 +119,7 @@ export default function Navbar() {
             </button>
 
             {isAuthenticated ? (
-              <div ref={userMenuRef} className="relative hidden md:block">
+              <div ref={userMenuRef} className="relative hidden lg:block">
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                   className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-xl hover:bg-warm-100 transition-colors"
@@ -128,21 +148,23 @@ export default function Navbar() {
                         onClick={handleLogout}
                         className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
                       >
-                        <LogOut size={16} /> Deconnexion
+                        <LogOut size={16} /> Déconnexion
                       </button>
                     </div>
                   </div>
                 )}
               </div>
             ) : (
-              <Link to="/login" className="hidden md:flex btn-primary !py-2.5 !px-5 text-sm">
+              <Link to="/login" className="hidden lg:flex btn-primary !py-2.5 !px-5 text-sm">
                 Connexion
               </Link>
             )}
 
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="md:hidden p-2.5 rounded-xl hover:bg-warm-100 text-warm-700 transition-colors"
+              aria-label="Menu"
+              aria-expanded={menuOpen}
+              className="lg:hidden p-2.5 rounded-xl hover:bg-warm-100 text-warm-700 transition-colors"
             >
               {menuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
@@ -150,18 +172,16 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* Mobile menu */}
       {menuOpen && (
         <>
-          <div className="fixed inset-0 bg-black/30 z-40 md:hidden" onClick={() => setMenuOpen(false)} />
-          <div className="fixed top-0 right-0 w-[280px] h-full bg-white z-50 md:hidden animate-slide-in-right shadow-float">
+          <div className="fixed inset-0 bg-black/30 z-40 lg:hidden" onClick={() => setMenuOpen(false)} />
+          <div className="fixed top-0 right-0 w-[300px] h-full bg-white z-50 lg:hidden animate-slide-in-right shadow-float overflow-y-auto">
             <div className="p-5">
               <div className="flex items-center justify-between mb-8">
                 <Link to="/" className="flex items-center gap-2">
-                  <img src="/logo.png" alt="MySugu" className="h-8 w-8" />
-                  <span className="font-display font-extrabold text-lg">My<span className="text-brand-500">Sugu</span></span>
+                  <Logo />
                 </Link>
-                <button onClick={() => setMenuOpen(false)} className="p-2 rounded-xl hover:bg-warm-100">
+                <button onClick={() => setMenuOpen(false)} aria-label="Fermer" className="p-2 rounded-xl hover:bg-warm-100 min-h-[44px] min-w-[44px] inline-flex items-center justify-center">
                   <X size={20} className="text-warm-600" />
                 </button>
               </div>
@@ -177,9 +197,15 @@ export default function Navbar() {
                 </div>
               )}
               <nav className="space-y-1">
-                <MobileLink to="/" label="Accueil" />
-                <MobileLink to="/restaurants" label="Restaurants" />
-                <MobileLink to="/promotions" label="Promotions" />
+                {NAV_ITEMS.map(item => (
+                  <MobileLink key={item.to} to={item.to} label={item.label} />
+                ))}
+                <button
+                  onClick={openContact}
+                  className="flex items-center gap-2 w-full text-left px-4 py-3 rounded-xl text-sm font-medium text-warm-700 hover:bg-warm-50 transition-colors"
+                >
+                  <Mail size={16} /> Contact
+                </button>
                 {isAuthenticated && (
                   <>
                     <MobileLink to="/mes-commandes" label="Mes commandes" />
@@ -193,12 +219,12 @@ export default function Navbar() {
               <div className="mt-8 pt-6 border-t border-warm-100">
                 {isAuthenticated ? (
                   <button onClick={handleLogout} className="flex items-center gap-3 w-full px-4 py-3 text-sm text-red-500 hover:bg-red-50 rounded-xl">
-                    <LogOut size={18} /> Deconnexion
+                    <LogOut size={18} /> Déconnexion
                   </button>
                 ) : (
                   <div className="space-y-2">
                     <Link to="/login" className="btn-primary block text-center text-sm">Se connecter</Link>
-                    <Link to="/register" className="btn-outline block text-center text-sm">Creer un compte</Link>
+                    <Link to="/register" className="btn-outline block text-center text-sm">Créer un compte</Link>
                   </div>
                 )}
               </div>
@@ -208,13 +234,15 @@ export default function Navbar() {
       )}
 
       <div className="h-16" />
+
+      <ContactModal open={contactOpen} onClose={() => setContactOpen(false)} />
     </>
   )
 }
 
 function NavLink({ to, active, children }: { to: string; active: boolean; children: React.ReactNode }) {
   return (
-    <Link to={to} className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${active ? 'text-brand-500 bg-brand-50' : 'text-warm-600 hover:text-warm-900 hover:bg-warm-100'}`}>
+    <Link to={to} aria-current={active ? 'page' : undefined} className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${active ? 'text-brand-500 bg-brand-50' : 'text-warm-600 hover:text-warm-900 hover:bg-warm-100'}`}>
       {children}
     </Link>
   )
@@ -230,8 +258,9 @@ function DropdownLink({ to, icon, label }: { to: string; icon: React.ReactNode; 
 
 function MobileLink({ to, label }: { to: string; label: string }) {
   const { pathname } = useLocation()
+  const active = to === '/' ? pathname === '/' : pathname.startsWith(to)
   return (
-    <Link to={to} className={`block px-4 py-3 rounded-xl text-sm font-medium transition-colors ${pathname === to ? 'text-brand-500 bg-brand-50' : 'text-warm-700 hover:bg-warm-50'}`}>
+    <Link to={to} aria-current={active ? 'page' : undefined} className={`block px-4 py-3 rounded-xl text-sm font-medium transition-colors ${active ? 'text-brand-500 bg-brand-50' : 'text-warm-700 hover:bg-warm-50'}`}>
       {label}
     </Link>
   )

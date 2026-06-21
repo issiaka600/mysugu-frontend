@@ -107,10 +107,10 @@ export default function RestaurantDetailPage() {
 
           {/* Actions */}
           <div className="absolute top-4 right-4 flex gap-2">
-            <button onClick={toggleFav} className={`p-2.5 rounded-full backdrop-blur-sm transition-colors ${isFav ? 'bg-red-500 text-white' : 'bg-white/80 text-warm-700 hover:bg-white'}`}>
+            <button onClick={toggleFav} aria-label={isFav ? 'Retirer des favoris' : 'Ajouter aux favoris'} aria-pressed={isFav} className={`p-2.5 rounded-full backdrop-blur-sm transition-colors ${isFav ? 'bg-red-500 text-white' : 'bg-white/80 text-warm-700 hover:bg-white'}`}>
               <Heart size={18} className={isFav ? 'fill-white' : ''} />
             </button>
-            <button className="p-2.5 rounded-full bg-white/80 text-warm-700 hover:bg-white backdrop-blur-sm transition-colors">
+            <button aria-label="Partager" className="p-2.5 rounded-full bg-white/80 text-warm-700 hover:bg-white backdrop-blur-sm transition-colors">
               <Share2 size={18} />
             </button>
           </div>

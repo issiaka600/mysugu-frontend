@@ -49,6 +49,12 @@ export const authApi = {
     apiClient.post('/api/auth/reset-password', { email, code, newPassword }),
 
   /**
+   * POST /api/auth/reset-password — définir un mot de passe via lien tokenisé (invitation)
+   */
+  definirMotDePasse: (token: string, nouveauMotDePasse: string) =>
+    apiClient.post('/api/auth/reset-password', { token, nouveauMotDePasse }),
+
+  /**
    * POST /api/auth/change-password
    * Authenticated
    */

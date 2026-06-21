@@ -28,7 +28,7 @@ export default function CartSidebar() {
               <p className="text-xs text-warm-400">{count > 0 ? `${count} article${count > 1 ? 's' : ''}` : 'Vide'}</p>
             </div>
           </div>
-          <button onClick={closeCart} className="p-2 rounded-xl hover:bg-warm-100 text-warm-400 transition-colors">
+          <button onClick={closeCart} aria-label="Fermer" className="p-2 rounded-xl hover:bg-warm-100 text-warm-400 transition-colors min-h-[44px] min-w-[44px] inline-flex items-center justify-center">
             <X size={20} />
           </button>
         </div>
@@ -61,18 +61,18 @@ export default function CartSidebar() {
                     <p className="text-sm font-bold text-brand-500 mt-0.5">{formatPrice(item.dish.price)}</p>
                     <div className="flex items-center justify-between mt-2">
                       <div className="flex items-center gap-1">
-                        <button onClick={() => updateQty(item.dish.id, item.quantity - 1)}
-                          className="w-7 h-7 rounded-lg bg-white border border-warm-200 flex items-center justify-center hover:border-brand-300 text-warm-600 transition-colors">
+                        <button onClick={() => updateQty(item.dish.id, item.quantity - 1)} aria-label="Diminuer la quantité"
+                          className="w-7 h-7 rounded-lg bg-white border border-warm-200 flex items-center justify-center hover:border-brand-300 text-warm-600 transition-colors min-h-[44px] min-w-[44px]">
                           <Minus size={14} />
                         </button>
                         <span className="w-8 text-center text-sm font-bold text-warm-900">{item.quantity}</span>
-                        <button onClick={() => updateQty(item.dish.id, item.quantity + 1)}
-                          className="w-7 h-7 rounded-lg bg-white border border-warm-200 flex items-center justify-center hover:border-brand-300 text-warm-600 transition-colors">
+                        <button onClick={() => updateQty(item.dish.id, item.quantity + 1)} aria-label="Augmenter la quantité"
+                          className="w-7 h-7 rounded-lg bg-white border border-warm-200 flex items-center justify-center hover:border-brand-300 text-warm-600 transition-colors min-h-[44px] min-w-[44px]">
                           <Plus size={14} />
                         </button>
                       </div>
-                      <button onClick={() => removeItem(item.dish.id)}
-                        className="p-1.5 rounded-lg text-warm-300 hover:text-red-500 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100">
+                      <button onClick={() => removeItem(item.dish.id)} aria-label="Retirer l'article"
+                        className="p-1.5 rounded-lg text-warm-300 hover:text-red-500 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100 min-h-[44px] min-w-[44px] inline-flex items-center justify-center">
                         <Trash2 size={14} />
                       </button>
                     </div>

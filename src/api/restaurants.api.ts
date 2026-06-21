@@ -8,6 +8,7 @@ export interface RestaurantListParams {
   latitude?: number
   longitude?: number
   maxDistance?: number
+  vertical?: string
 }
 
 export const restaurantsApi = {

@@ -1,10 +1,13 @@
 import axios, { type AxiosError } from 'axios'
 import type { ApiError } from '@/types/api'
 
+// In production builds VITE_API_URL points to the canonical backend domain
+// (e.g. https://api.mysukuapp.com). In dev, leave it unset to use the Vite proxy
+// which forwards /api and /auth to http://localhost:8083.
+const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) || ''
+
 const apiClient = axios.create({
-  // Vite proxy forwards /api → http://localhost:8083/api
-  // and /auth → http://localhost:8083/auth
-  baseURL: '',
+  baseURL: API_BASE,
   headers: { 'Content-Type': 'application/json' },
   timeout: 15_000,
 })

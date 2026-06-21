@@ -1,12 +1,26 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Search, SlidersHorizontal, X, ChevronDown } from 'lucide-react'
+import { Search, SlidersHorizontal, X, ChevronDown, MapPin, Star, Zap, Clock, Tag, Flame } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { categoriesApi, restaurantsApi, mapCategory, mapRestaurant } from '@/api'
 import type { Category, Restaurant } from '@/types'
 import RestaurantCard from '@/components/RestaurantCard'
 import { RestaurantCardSkeleton } from '@/components/Skeleton'
+import EmptyState from '@/components/EmptyState'
+import Chip from '@/components/Chip'
 
 type SortOption = 'recommended' | 'rating' | 'delivery_time'
+type QuickFilter = 'all' | 'subsahariens' | 'promotions' | 'closest' | 'top_rated' | 'fastest' | 'open_now'
+
+const QUICK_FILTERS: { id: QuickFilter; label: string; icon: LucideIcon }[] = [
+  { id: 'all',          label: 'Tous',         icon: Flame },
+  { id: 'subsahariens', label: 'Subsahariens', icon: Tag },
+  { id: 'promotions',   label: 'Promotions',   icon: Zap },
+  { id: 'closest',      label: 'Plus proches', icon: MapPin },
+  { id: 'top_rated',    label: 'Mieux notés',  icon: Star },
+  { id: 'fastest',      label: 'Plus rapides', icon: Clock },
+  { id: 'open_now',     label: 'Ouverts',      icon: Zap },
+]
 
 export default function RestaurantsPage() {
   const [params, setParams] = useSearchParams()
@@ -18,6 +32,7 @@ export default function RestaurantsPage() {
   const [selectedCat, setSelectedCat] = useState(initialCat)
   const [sort, setSort] = useState<SortOption>('recommended')
   const [openOnly, setOpenOnly] = useState(false)
+  const [quickFilter, setQuickFilter] = useState<QuickFilter>('all')
   const [restaurants, setRestaurants] = useState<Restaurant[]>([])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(0)
@@ -53,13 +68,30 @@ export default function RestaurantsPage() {
     fetchRestaurants(0)
   }, [fetchRestaurants])
 
-  const filteredRestaurants = restaurants
-    .filter(r => !openOnly || r.isOpen)
-    .sort((a, b) => {
-      if (sort === 'rating') return b.rating - a.rating
-      if (sort === 'delivery_time') return parseInt(a.deliveryTime) - parseInt(b.deliveryTime)
+  const filteredRestaurants = useMemo(() => {
+    let list = [...restaurants]
+
+    if (openOnly || quickFilter === 'open_now') list = list.filter(r => r.isOpen)
+    if (quickFilter === 'subsahariens') {
+      list = list.filter(r => {
+        const haystack = `${(r.tags || []).join(' ')} ${r.cuisineType || ''}`.toLowerCase()
+        return /subsah|africain|malien|sénégalais|senegalais|wolof|bambara/.test(haystack)
+      })
+    }
+    if (quickFilter === 'promotions') {
+      list = list.filter(r => (r.tags || []).some(t => /promo|offre|reduction|réduction/i.test(t)))
+    }
+
+    let activeSort = sort
+    if (quickFilter === 'top_rated') activeSort = 'rating'
+    if (quickFilter === 'fastest' || quickFilter === 'closest') activeSort = 'delivery_time'
+
+    return list.sort((a, b) => {
+      if (activeSort === 'rating') return b.rating - a.rating
+      if (activeSort === 'delivery_time') return parseInt(a.deliveryTime) - parseInt(b.deliveryTime)
       return 0
     })
+  }, [restaurants, openOnly, sort, quickFilter])
 
   const handleCat = (catId: string) => {
     const next = selectedCat === catId ? '' : catId
@@ -94,16 +126,19 @@ export default function RestaurantsPage() {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Rechercher un restaurant..."
+              aria-label="Rechercher un restaurant"
               className="input-field !pl-11 !pr-10"
             />
             {search && (
-              <button type="button" onClick={() => { setSearch(''); }} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-warm-100 text-warm-400">
+              <button type="button" onClick={() => { setSearch(''); }} aria-label="Effacer la recherche" className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-warm-100 text-warm-400 min-h-[44px] min-w-[44px] inline-flex items-center justify-center">
                 <X size={16} />
               </button>
             )}
           </form>
           <button
             onClick={() => setShowFilters(!showFilters)}
+            aria-label="Filtres"
+            aria-expanded={showFilters}
             className={`p-3.5 rounded-2xl border transition-colors shrink-0 ${showFilters ? 'bg-brand-50 border-brand-200 text-brand-500' : 'bg-white border-warm-200 text-warm-600 hover:bg-warm-50'}`}
           >
             <SlidersHorizontal size={18} />
@@ -117,8 +152,8 @@ export default function RestaurantsPage() {
               <label className="text-xs font-bold text-warm-600 uppercase tracking-wider mb-2 block">Trier par</label>
               <div className="flex flex-wrap gap-2">
                 {[
-                  { value: 'recommended', label: 'Recommande' },
-                  { value: 'rating', label: 'Mieux note' },
+                  { value: 'recommended', label: 'Recommandé' },
+                  { value: 'rating', label: 'Mieux noté' },
                   { value: 'delivery_time', label: 'Plus rapide' },
                 ].map(opt => (
                   <button
@@ -143,22 +178,22 @@ export default function RestaurantsPage() {
           </div>
         )}
 
+        {/* Quick filters (mobile-app style) */}
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide mb-4 pb-1">
+          {QUICK_FILTERS.map(f => (
+            <Chip key={f.id} active={quickFilter === f.id} icon={f.icon} onClick={() => setQuickFilter(f.id)}>
+              {f.label}
+            </Chip>
+          ))}
+        </div>
+
         {/* Categories */}
         <div className="flex gap-2 overflow-x-auto scrollbar-hide mb-8 pb-1">
-          <button
-            onClick={() => handleCat('')}
-            className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors shrink-0 ${!selectedCat ? 'bg-brand-500 text-white shadow-brand-sm' : 'bg-white text-warm-600 border border-warm-200 hover:bg-warm-50'}`}
-          >
-            Tous
-          </button>
+          <Chip active={!selectedCat} onClick={() => handleCat('')}>Toutes catégories</Chip>
           {categories.map(cat => (
-            <button
-              key={cat.id}
-              onClick={() => handleCat(cat.id)}
-              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors shrink-0 ${selectedCat === cat.id ? 'bg-brand-500 text-white shadow-brand-sm' : 'bg-white text-warm-600 border border-warm-200 hover:bg-warm-50'}`}
-            >
+            <Chip key={cat.id} active={selectedCat === cat.id} onClick={() => handleCat(cat.id)}>
               {cat.emoji} {cat.name}
-            </button>
+            </Chip>
           ))}
         </div>
 
@@ -168,14 +203,10 @@ export default function RestaurantsPage() {
             {Array.from({ length: 6 }).map((_, i) => <RestaurantCardSkeleton key={i} />)}
           </div>
         ) : filteredRestaurants.length === 0 ? (
-          <div className="text-center py-20">
-            <p className="text-5xl mb-4">&#x1F50D;</p>
-            <h3 className="font-display font-bold text-xl text-warm-900 mb-2">Aucun resultat</h3>
-            <p className="text-warm-400 text-sm">Essayez avec d'autres filtres ou termes de recherche.</p>
-          </div>
+          <EmptyState icon={Search} title="Aucun résultat" description="Essayez avec d'autres filtres ou termes de recherche." />
         ) : (
           <>
-            <p className="text-sm text-warm-400 mb-4">{filteredRestaurants.length} restaurant{filteredRestaurants.length > 1 ? 's' : ''}</p>
+            <p className="text-sm text-warm-500 mb-4">{filteredRestaurants.length} restaurant{filteredRestaurants.length > 1 ? 's' : ''}</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {filteredRestaurants.map(r => <RestaurantCard key={r.id} restaurant={r} />)}
             </div>

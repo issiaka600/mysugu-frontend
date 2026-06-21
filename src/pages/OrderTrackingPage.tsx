@@ -153,7 +153,7 @@ export default function OrderTrackingPage() {
               </div>
               <div className="flex-1">
                 <p className="font-semibold text-warm-900">{order.livreur.prenom} {order.livreur.nom}</p>
-                <p className="text-sm text-warm-400">Livreur MySugu</p>
+                <p className="text-sm text-warm-400">Livreur MySuku</p>
               </div>
               {order.livreur.telephone && (
                 <a href={`tel:${order.livreur.telephone}`} className="p-3 rounded-xl bg-brand-50 text-brand-500 hover:bg-brand-100 transition-colors">

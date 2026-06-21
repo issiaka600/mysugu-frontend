@@ -39,11 +39,11 @@ export default function ProfilePage() {
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (newPw.length < 6) { toast.error('Min 6 caracteres'); return }
+    if (newPw.length < 6) { toast.error('Min 6 caractères'); return }
     setPwLoading(true)
     try {
       await authApi.changePassword(oldPw, newPw)
-      toast.success('Mot de passe modifie')
+      toast.success('Mot de passe modifié')
       setShowPasswordForm(false)
       setOldPw('')
       setNewPw('')
@@ -88,8 +88,8 @@ export default function ProfilePage() {
             <div className="flex items-center gap-3 p-3 bg-warm-50 rounded-xl">
               <Phone size={18} className="text-brand-500" />
               <div className="min-w-0">
-                <p className="text-xs text-warm-400">Telephone</p>
-                <p className="text-sm font-medium text-warm-900">{user.phone || 'Non renseigne'}</p>
+                <p className="text-xs text-warm-400">Téléphone</p>
+                <p className="text-sm font-medium text-warm-900">{user.phone || 'Non renseigné'}</p>
               </div>
             </div>
           </div>
@@ -102,7 +102,7 @@ export default function ProfilePage() {
             <div className="relative">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <p className="text-white/70 text-sm">Niveau fidelite</p>
+                  <p className="text-white/70 text-sm">Niveau fidélité</p>
                   <p className="font-display font-extrabold text-2xl">{LEVEL_LABELS[fidelite.niveauFidelite]}</p>
                 </div>
                 <Star size={32} className="text-white/30" />
@@ -137,7 +137,7 @@ export default function ProfilePage() {
             </h2>
           </div>
           {addresses.length === 0 ? (
-            <p className="text-sm text-warm-400">Aucune adresse enregistree.</p>
+            <p className="text-sm text-warm-400">Aucune adresse enregistrée.</p>
           ) : (
             <div className="space-y-2">
               {addresses.map(a => (
@@ -147,7 +147,7 @@ export default function ProfilePage() {
                     <p className="text-sm font-medium text-warm-900">{a.label}</p>
                     <p className="text-xs text-warm-400 truncate">{a.address}, {a.city}</p>
                   </div>
-                  {a.isDefault && <span className="text-[10px] font-bold text-brand-500 bg-brand-50 px-2 py-0.5 rounded-full">Defaut</span>}
+                  {a.isDefault && <span className="text-[10px] font-bold text-brand-500 bg-brand-50 px-2 py-0.5 rounded-full">Défaut</span>}
                 </div>
               ))}
             </div>
@@ -157,12 +157,12 @@ export default function ProfilePage() {
         {/* Security */}
         <div className="bg-white rounded-3xl p-6 border border-warm-100 mb-6">
           <h2 className="font-display font-bold text-lg text-warm-900 flex items-center gap-2 mb-4">
-            <Lock size={18} className="text-brand-500" /> Securite
+            <Lock size={18} className="text-brand-500" /> Sécurité
           </h2>
           {showPasswordForm ? (
             <form onSubmit={handleChangePassword} className="space-y-3">
-              <input type="password" value={oldPw} onChange={e => setOldPw(e.target.value)} placeholder="Mot de passe actuel" className="input-field" required />
-              <input type="password" value={newPw} onChange={e => setNewPw(e.target.value)} placeholder="Nouveau mot de passe (min 6 car.)" className="input-field" required minLength={6} />
+              <input type="password" aria-label="Mot de passe actuel" value={oldPw} onChange={e => setOldPw(e.target.value)} placeholder="Mot de passe actuel" className="input-field" required />
+              <input type="password" aria-label="Nouveau mot de passe" value={newPw} onChange={e => setNewPw(e.target.value)} placeholder="Nouveau mot de passe (min 6 car.)" className="input-field" required minLength={6} />
               <div className="flex gap-2">
                 <button type="submit" disabled={pwLoading} className="btn-primary text-sm">
                   {pwLoading ? 'Modification...' : 'Modifier'}
@@ -179,7 +179,7 @@ export default function ProfilePage() {
 
         {/* Logout */}
         <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 py-4 text-red-500 font-semibold hover:bg-red-50 rounded-2xl transition-colors">
-          <LogOut size={18} /> Se deconnecter
+          <LogOut size={18} /> Se déconnecter
         </button>
       </div>
     </div>

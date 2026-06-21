@@ -217,8 +217,10 @@ export function mapReview(a: ApiAvis): Review {
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
 
+const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) || 'http://localhost:8083'
+
 function ensureAbsoluteUrl(url: string): string {
   if (!url) return ''
   if (url.startsWith('http')) return url
-  return `http://localhost:8083${url.startsWith('/') ? '' : '/'}${url}`
+  return `${API_BASE}${url.startsWith('/') ? '' : '/'}${url}`
 }

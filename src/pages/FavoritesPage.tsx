@@ -6,6 +6,7 @@ import { useAuthStore } from '@/store/authStore'
 import type { Restaurant } from '@/types'
 import RestaurantCard from '@/components/RestaurantCard'
 import { RestaurantCardSkeleton } from '@/components/Skeleton'
+import EmptyState from '@/components/EmptyState'
 
 export default function FavoritesPage() {
   const navigate = useNavigate()
@@ -28,21 +29,19 @@ export default function FavoritesPage() {
     <div className="min-h-screen bg-warm-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         <h1 className="section-title mb-2">Mes favoris</h1>
-        <p className="section-subtitle mb-8">Vos restaurants preferes</p>
+        <p className="section-subtitle mb-8">Vos restaurants préférés</p>
 
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {Array.from({ length: 3 }).map((_, i) => <RestaurantCardSkeleton key={i} />)}
           </div>
         ) : restaurants.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="w-20 h-20 rounded-full bg-warm-100 flex items-center justify-center mx-auto mb-4">
-              <Heart size={32} className="text-warm-300" />
-            </div>
-            <h3 className="font-display font-bold text-xl text-warm-900 mb-2">Aucun favori</h3>
-            <p className="text-sm text-warm-400 mb-6">Ajoutez des restaurants a vos favoris pour les retrouver facilement.</p>
-            <Link to="/restaurants" className="btn-primary text-sm">Explorer les restaurants</Link>
-          </div>
+          <EmptyState
+            icon={Heart}
+            title="Aucun favori"
+            description="Ajoutez des restaurants à vos favoris pour les retrouver facilement."
+            action={<Link to="/restaurants" className="btn-primary text-sm">Explorer les restaurants</Link>}
+          />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {restaurants.map(r => <RestaurantCard key={r.id} restaurant={r} />)}

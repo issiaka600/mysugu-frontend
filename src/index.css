@@ -3,6 +3,18 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --brand-500: #E0231A;
+    --brand-600: #C21E12;
+    --saffron-500: #F2A900;
+    --warm-500: #8A7148;
+    --espresso-900: #2B1E12;
+    --success: #1E9E5A;
+    --warning: #E08A00;
+    --error: #DC2626;
+    --info: #1F6FE0;
+  }
+
   *, *::before, *::after {
     box-sizing: border-box;
   }
@@ -23,6 +35,29 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Syne', sans-serif;
   }
+
+  a:focus-visible, button:focus-visible, [role="button"]:focus-visible,
+  input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid var(--brand-500);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  .skip-link {
+    @apply sr-only;
+  }
+  .skip-link:focus {
+    @apply not-sr-only fixed top-3 left-3 z-[100] bg-brand-500 text-white px-4 py-2 rounded-xl font-semibold no-underline;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
 @layer components {
@@ -35,17 +70,26 @@
   .btn-primary {
     @apply bg-brand-gradient text-white font-semibold rounded-2xl px-6 py-3.5
            hover:shadow-brand active:scale-[0.98] transition-all duration-200
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2
            disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none;
   }
 
   .btn-outline {
     @apply border-2 border-brand-500 text-brand-500 font-semibold rounded-2xl px-6 py-3.5
-           hover:bg-brand-50 active:scale-[0.98] transition-all duration-200;
+           hover:bg-brand-50 active:scale-[0.98] transition-all duration-200
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2;
   }
 
   .btn-ghost {
     @apply text-warm-600 font-medium rounded-2xl px-4 py-2.5
-           hover:bg-warm-100 active:scale-[0.98] transition-all duration-200;
+           hover:bg-warm-100 active:scale-[0.98] transition-all duration-200
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2;
+  }
+
+  .btn-saffron {
+    @apply bg-saffron-500 text-espresso-900 font-semibold rounded-2xl px-6 py-3.5
+           hover:bg-saffron-600 hover:text-white active:scale-[0.98] transition-all duration-200
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-saffron-500 focus-visible:ring-offset-2;
   }
 
   .section-title {
@@ -75,6 +119,18 @@
   .badge-danger {
     @apply badge bg-red-50 text-red-600;
   }
+
+  .badge-error {
+    @apply badge bg-error-50 text-error;
+  }
+
+  .badge-info {
+    @apply badge bg-info-50 text-info;
+  }
+
+  .badge-saffron {
+    @apply badge bg-saffron-50 text-saffron-600;
+  }
 }
 
 @layer utilities {
@@ -103,16 +159,16 @@
   /* Text balance */
   .text-balance { text-wrap: balance; }
 
-  /* Brand gradient */
+  /* Brand gradient (red) */
   .text-brand-gradient {
-    background: linear-gradient(135deg, #E84723 0%, #FF6D47 100%);
+    background: linear-gradient(135deg, #9E1A0F 0%, #E0231A 50%, #F2503D 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .bg-brand-gradient {
-    background: linear-gradient(135deg, #E84723 0%, #FF6D47 100%);
+    background: linear-gradient(135deg, #E0231A 0%, #C21E12 100%);
   }
 
   .bg-warm-gradient {
@@ -120,7 +176,7 @@
   }
 
   .bg-hero-gradient {
-    background: linear-gradient(135deg, #FFF4F1 0%, #FFFBF5 40%, #FFF0E0 100%);
+    background: linear-gradient(135deg, #FFF1F1 0%, #FFFBF5 40%, #FFE9E5 100%);
   }
 
   /* Glass effects */
@@ -192,7 +248,7 @@
   border-radius: 2px;
 }
 .cart-items::-webkit-scrollbar-thumb {
-  background: #E84723;
+  background: #DC2A1B;
   border-radius: 2px;
 }
 
