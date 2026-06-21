@@ -47,6 +47,7 @@ export interface Dish {
   ingredients?: string[]
   tempsPreparation?: number
   options?: DishOption[]
+  optionGroups?: import('./api').ApiOptionGroup[]
 }
 
 export interface DishOption {

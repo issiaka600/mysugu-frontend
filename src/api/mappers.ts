@@ -86,6 +86,7 @@ export function mapPlat(p: ApiPlat): Dish {
     isAvailable: p.isAvailable && p.availabilityMode === 'DISPONIBLE',
     ingredients: p.ingredients,
     tempsPreparation: p.tempsPreparation,
+    optionGroups: p.optionGroups ?? [],
   }
 }
 

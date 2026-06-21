@@ -1,10 +1,8 @@
 import { Plus, Minus, Clock } from 'lucide-react'
-import { useState, useEffect } from 'react'
 import type { Dish } from '@/types'
 import { useCartStore } from '@/store/cartStore'
 import { formatPrice } from '@/utils/format'
 import toast from 'react-hot-toast'
-import { platOptionsApi, type ApiOptionGroup } from '@/api/platOptions.api'
 
 interface Props {
   dish: Dish
@@ -18,14 +16,7 @@ export default function DishCard({ dish, restaurantId, restaurantName, layout = 
   const cartItem = items.find(i => i.dish.id === dish.id)
   const qty = cartItem?.quantity || 0
 
-  const [platOptions, setPlatOptions] = useState<ApiOptionGroup[]>([])
-  useEffect(() => {
-    const platId = parseInt(dish.id, 10)
-    if (!platId) { setPlatOptions([]); return }
-    platOptionsApi.get(platId)
-      .then(r => setPlatOptions(r.data))
-      .catch(() => setPlatOptions([]))
-  }, [dish.id])
+  const platOptions = dish.optionGroups ?? []
 
   const handleAdd = () => {
     if (!dish.isAvailable) return
