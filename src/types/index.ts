@@ -55,11 +55,20 @@ export interface DishOption {
   choices: { label: string; extra: number }[]
 }
 
+export interface SelectedOption {
+  optionItemId: number
+  optionGroupNom?: string
+  optionNom: string
+  prixSupplement: number
+}
+
 export interface CartItem {
+  lineId: string
   dish: Dish
   quantity: number
   restaurantId: string
   restaurantName: string
+  selectedOptions?: SelectedOption[]
 }
 
 export interface User {
