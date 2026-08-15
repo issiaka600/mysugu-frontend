@@ -1,0 +1,15 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "RR9PS96V4D.ma.mysuku.customer",
+        "paths": ["/verify-email*"]
+      },
+      {
+        "appID": "57Q8CCY5PY.ma.mysuku.customer",
+        "paths": ["/verify-email*"]
+      }
+    ]
+  }
+}
