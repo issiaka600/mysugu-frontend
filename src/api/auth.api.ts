@@ -37,6 +37,20 @@ export const authApi = {
     apiClient.get<ApiUser>('/users/profile'),
 
   /**
+   * POST /api/auth/verify-email
+   * Public — valide le token reçu par email (lien /verify-email?token=…)
+   */
+  verifyEmail: (token: string) =>
+    apiClient.post('/api/auth/verify-email', { token }),
+
+  /**
+   * POST /api/auth/resend-verification
+   * Public — renvoie un lien de vérification (remplace un lien expiré)
+   */
+  resendVerification: (email: string) =>
+    apiClient.post('/api/auth/resend-verification', { email }),
+
+  /**
    * POST /api/auth/forgot-password
    */
   forgotPassword: (email: string) =>
