@@ -35,7 +35,7 @@ function ScrollToTop() {
   return null
 }
 
-const AUTH_PATHS = ['/login', '/register', '/mot-de-passe-oublie', '/definir-mot-de-passe', '/verify-email']
+const AUTH_PATHS = ['/login', '/register', '/mot-de-passe-oublie', '/definir-mot-de-passe', '/reset-password', '/verify-email']
 
 function Layout() {
   const { pathname } = useLocation()
@@ -67,6 +67,9 @@ function Layout() {
         <Route path="/register"            element={<RegisterPage />} />
         <Route path="/mot-de-passe-oublie" element={<ForgotPasswordPage />} />
         <Route path="/definir-mot-de-passe" element={<DefinirMotDePassePage />} />
+        {/* Lien de réinitialisation envoyé par email : même contrat que l'invitation
+            ({token, nouveauMotDePasse} → POST /api/auth/reset-password), donc même page. */}
+        <Route path="/reset-password"      element={<DefinirMotDePassePage />} />
         <Route path="/verify-email"        element={<VerifyEmailPage />} />
         <Route path="*" element={
           <div className="min-h-screen bg-warm-50 flex items-center justify-center pt-20">
